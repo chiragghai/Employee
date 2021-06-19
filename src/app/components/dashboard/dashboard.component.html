@@ -1,0 +1,231 @@
+<div class="padding15">
+  <div class="center-align">
+    <h3>Employee List</h3>
+  </div>
+  <div class="mb-4">
+    <dx-data-grid
+      #dataGridVar
+      id="gridContainer"
+      [dataSource]="dataSource"
+      [allowColumnReordering]="true"
+      [showBorders]="true"
+      (onToolbarPreparing)="onToolbarPreparing($event)"
+      (onCustomToolClick)="addNewEmployee('add')"
+      (onInitialized)="saveGridInstance($event)"
+      [showRowLines]="true"
+      style="max-height: 200px"
+    >
+      <dxo-filter-row
+        [visible]="showFilterRow"
+        [applyFilter]="currentFilter"
+      ></dxo-filter-row>
+      <dxo-header-filter [visible]="showHeaderFilter"></dxo-header-filter>
+
+      <dxo-scrolling mode="virtual" [useNative]="true"></dxo-scrolling>
+
+      <dxi-column dataField="name" caption="Name"> </dxi-column>
+      <div *dxTemplate="let row of 'cellTemplateName'">
+        <dx-autocomplete [dataSource]="name"> </dx-autocomplete>
+      </div>
+
+      <dxi-column
+        dataField="address"
+        caption="Address"
+        cellTemplate="headerTemplate"
+      >
+      </dxi-column>
+      <div *dxTemplate="let data of 'headerTemplate'">
+        <div (click)="ok(data)">
+          {{ data.data.address.street }}{{ data.data.address.suite }},{{
+            data.data.address.city
+          }},{{ data.data.address.zipcode }}
+        </div>
+      </div>
+      <dxi-column dataField="company.name"></dxi-column>
+      <dxi-column
+        dataField="Actions"
+        cellTemplate="cellTemplateActions"
+      ></dxi-column>
+
+      <div *dxTemplate="let row of 'cellTemplateActions'">
+        <div
+          class="btn-group btn-group-sm d-flex"
+          role="group"
+          aria-label="..."
+        >
+          <button
+            class="btn btn-primary btn-warning"
+            style="margin-right: 10px"
+            (click)="addNewEmployee('edit', row)"
+          >
+            Edit
+          </button>
+          <button
+            class="btn btn-primary btn-danger"
+            (click)="deleteEmployee(row)"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </dx-data-grid>
+  </div>
+
+  <div>
+    <div class="center-align">
+      <h3>Deleted Employee List</h3>
+    </div>
+    <div>
+      <dx-data-grid
+        #dataGridVar
+        id="gridContainer2"
+        [dataSource]="deletedItems"
+        [filterRow]="{ visible: true }"
+        [allowColumnReordering]="true"
+        [showBorders]="true"
+        style="max-height: 200px"
+        (onInitialized)="saveGridInstance($event)"
+        [showRowLines]="true"
+      >
+        <dxo-scrolling mode="virtual" [useNative]="true"></dxo-scrolling>
+
+        <dxi-column dataField="name" caption="Name"></dxi-column>
+        <dxi-column
+          dataField="address"
+          cellTemplate="headerTemplate"
+        ></dxi-column>
+        <dxi-column dataField="company.name"></dxi-column>
+        <dxi-column
+          dataField="Actions"
+          cellTemplate="cellTemplateActionsDelete"
+        ></dxi-column>
+        <div *dxTemplate="let data of 'headerTemplate'">
+          <div (click)="ok(data)">
+            {{ data.data.address.street }}{{ data.data.address.suite }},{{
+              data.data.address.city
+            }},{{ data.data.address.zipcode }}
+          </div>
+        </div>
+
+        <div
+          *dxTemplate="let row of 'cellTemplateActionsDelete'"
+          style="text-align: center"
+        >
+          <div class="btn-group btn-group-sm" role="group" aria-label="...">
+            <button
+              class="btn btn-primary btn-warning"
+              style="width: 120px"
+              (click)="restoreEmployee(row)"
+            >
+              Restore
+            </button>
+          </div>
+        </div>
+      </dx-data-grid>
+    </div>
+  </div>
+</div>
+
+<div class="outer-popup" *ngIf="showpopup">
+  <div class="popup">
+    <div class="header">
+      <div>
+        <h4>{{ editFlag ? "EDIT EMPLOYEE" : "ADD EMPLOYEE" }}</h4>
+      </div>
+      <div (click)="showpopup = false; employeeForm.reset()" class="close">
+        &times;
+      </div>
+    </div>
+    <div class="padding15">
+      <form [formGroup]="employeeForm">
+        <div>
+          <div class="mb-3">
+            <label class="mb-1">Name:</label>
+            <input
+              type="text"
+              class="form-control w-75"
+              formControlName="name"
+              placeholder="Enter Name"
+            />
+          </div>
+          <div
+            formArrayName="address"
+            *ngFor="
+              let item of employeeForm.controls.address.controls;
+              let i = index
+            "
+          >
+            <label>Address :</label>
+            <div
+              [formGroupName]="i"
+              style="
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                padding-left: 15px;
+              "
+            >
+              <div class="mb-3">
+                <label class="mb-1">Street</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="street"
+                  placeholder="Enter Street"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="mb-1">Suite:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="suite"
+                  placeholder="Enter suite"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="mb-1">City:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="city"
+                  placeholder="Enter city"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="mb-1">Zipcode:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="zipcode"
+                  placeholder="Enter zipcode"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="mb-1">Company:</label>
+            <input
+              type="text"
+              class="form-control w-75"
+              formControlName="company"
+              placeholder="Enter Company"
+            />
+          </div>
+        </div>
+        <div style="text-align: center">
+          <button
+            type="button"
+            class="btn btn-custom"
+            [disabled]="!employeeForm.valid"
+            (click)="createEditEmployee(employeeForm)"
+          >
+            {{ editFlag ? "EDIT" : "ADD" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

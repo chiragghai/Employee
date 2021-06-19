@@ -24,7 +24,10 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/devextreme/dist/css/dx.common.css",
+              "node_modules/devextreme/dist/css/dx.light.css",
               "src/styles.css"
+
             ],
             "scripts": []
           },
@@ -120,5 +123,8 @@
       }
     }
   },
-  "defaultProject": "Employee"
+  "defaultProject": "Employee",
+  "cli": {
+    "analytics": false
+  }
 }
